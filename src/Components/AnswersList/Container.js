@@ -1,4 +1,4 @@
-import { compose, withStateHandlers, withHandlers, lifecycle, branch, renderComponent } from 'recompose';
+import { compose, withStateHandlers, withHandlers, withProps, lifecycle, branch, renderComponent } from 'recompose';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { db } from '../../utils';
@@ -8,7 +8,42 @@ import Component from './Component';
 
 const mapStateToProps = state => ({
   user: state.user,
+  sortBy: state.answerSort,
 });
+
+const prepareAnswers = ({answers, votes, sortBy}) => {
+  let sortedAnswers = answers.slice();
+  switch (sortBy) {
+    case 'best': {
+      sortByVotes(sortedAnswers, votes, true);
+      break;
+    }
+    case 'worst': {
+      sortByVotes(sortedAnswers, votes, false);
+      break;
+    }
+    case 'createdAt': {
+      sortByDate(sortedAnswers);
+      break; 
+    }
+  }
+  return sortedAnswers;    
+};
+
+const sortByVotes = (answers, votes, isPositive) =>
+  answers.sort((a, b) =>
+    getVotesCount(b, votes, isPositive) - getVotesCount(a, votes, isPositive)
+  );
+
+const sortByDate = (answers) =>
+  answers.sort((a, b) =>
+    new Date(a.createdAt) - new Date(b.createdAt)
+  );
+
+const getVotesCount = (answer, votes, isPositive) =>
+  votes.reduce((sum, vote) => 
+    vote.answerId === answer._id && vote.isPositive === isPositive ? sum + 1 : sum,
+  0);
 
 const enhance = compose(
   connect(mapStateToProps),
@@ -55,6 +90,7 @@ const enhance = compose(
       }
     }
   }),
+  withProps(props => ({ answers: prepareAnswers(props) })),
 );
 
 
