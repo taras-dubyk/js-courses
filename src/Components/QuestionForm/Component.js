@@ -5,6 +5,7 @@ import Form from '../Form/Component';
 import TextInput from '../TextInput/Component';
 import Button from '../Buttons/Button';
 import StyledHeader from '../Common/StyledHeader';
+import AppLoader from '../Loaders/AppLoader';
 
 
 const Description = styled.textarea`
@@ -25,7 +26,8 @@ const ButtonWrapper = styled.div`
 const getHeader = isEdit => isEdit ? 'Edit Question' : 'Add Question';
 
 
-const QuestionForm = ({ title, description, tags, submitReady, onChange, onSubmit, onRemove, match }) => (
+const QuestionForm = ({ title, description, tags, submitReady, onChange, onSubmit, onRemove, match, createQuestionLoader }) => (
+  createQuestionLoader ? <AppLoader /> :
   <Form onSubmit={onSubmit}>
     <StyledHeader>
       {getHeader(match.params.questionId)}
